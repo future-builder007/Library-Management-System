@@ -30,6 +30,10 @@ npm start
 
 # 或者直接运行
 node bin/my_lms.js
+
+# 或者
+npm link
+my_lms
 ```
 
 ## 快速开始
