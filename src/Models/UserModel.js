@@ -1,10 +1,8 @@
-// src/managers/UserManager.js
-
 const Constants = require('../utils/Constants');
 const Messages = require('../utils/Messages');
 const Validators = require('../utils/Validators');
 
-class UserManager {
+class UserModel {
   constructor() {
     this.users = new Map(); // {name: {role, password, borrowedBooks}}
     this.currentUser = null;
@@ -59,7 +57,7 @@ class UserManager {
 
   /**
    * 用户登出
-   * @returns {string} 登出结果消息
+   * @returns {string}
    */
   logout() {
     if (!this.currentUser) {
@@ -71,47 +69,8 @@ class UserManager {
   }
 
   /**
-   * 检查用户是否已登录
-   * @returns {string|null} 错误消息或null
-   */
-  checkLogin() {
-    if (!this.currentUser) {
-      return Messages.NOT_LOGGED_IN;
-    }
-    return null;
-  }
-
-  /**
-   * 检查管理员权限
-   * @returns {string|null} 错误消息或null
-   */
-  checkAdminPermission() {
-    const loginCheck = this.checkLogin();
-    if (loginCheck) return loginCheck;
-
-    if (this.currentUser.role !== Constants.ROLES.ADMIN) {
-      return Messages.ADMIN_PERMISSION_REQUIRED;
-    }
-    return null;
-  }
-
-  /**
-   * 检查普通用户权限
-   * @returns {string|null} 错误消息或null
-   */
-  checkUserPermission() {
-    const loginCheck = this.checkLogin();
-    if (loginCheck) return loginCheck;
-
-    if (this.currentUser.role !== Constants.ROLES.USER) {
-      return Messages.USER_PERMISSION_REQUIRED;
-    }
-    return null;
-  }
-
-  /**
    * 获取当前用户
-   * @returns {Object|null} 当前用户对象或null
+   * @returns {Object|null}
    */
   getCurrentUser() {
     return this.currentUser;
@@ -119,11 +78,36 @@ class UserManager {
 
   /**
    * 获取用户数据
-   * @param {string} name - 用户名
-   * @returns {Object|null} 用户数据或null
+   * @param {string} name
+   * @returns {Object|null} 
    */
   getUser(name) {
     return this.users.get(name) || null;
+  }
+
+  /**
+   * 检查用户是否存在
+   * @param {string} name
+   * @returns {boolean}
+   */
+  userExists(name) {
+    return this.users.has(name);
+  }
+
+  /**
+   * 获取所有用户（管理员功能）
+   * @returns {Array} 用户列表
+   */
+  getAllUsers() {
+    const userList = [];
+    for (const [name, userData] of this.users) {
+      userList.push({
+        name,
+        role: userData.role,
+        borrowedBooksCount: userData.borrowedBooks.length
+      });
+    }
+    return userList;
   }
 
   /**
@@ -158,6 +142,67 @@ class UserManager {
     const user = this.users.get(userName);
     return user ? user.borrowedBooks.includes(bookKey) : false;
   }
+
+  /**
+   * 获取用户借阅的图书列表
+   * @param {string} userName - 用户名
+   * @returns {Array} 借阅的图书键值列表
+   */
+  getUserBorrowedBooks(userName) {
+    const user = this.users.get(userName);
+    return user ? [...user.borrowedBooks] : [];
+  }
+
+  /**
+   * 获取用户借阅统计
+   * @param {string} userName - 用户名
+   * @returns {Object} 借阅统计信息
+   */
+  getUserBorrowingStats(userName) {
+    const user = this.users.get(userName);
+    if (!user) {
+      return {
+        totalBorrowed: 0,
+        currentlyBorrowed: 0
+      };
+    }
+
+    return {
+      totalBorrowed: user.borrowedBooks.length, // 这里可以扩展为历史借阅记录
+      currentlyBorrowed: user.borrowedBooks.length
+    };
+  }
+
+  /**
+   * 获取用户总数
+   * @returns {number} 用户总数
+   */
+  getTotalUsers() {
+    return this.users.size;
+  }
+
+  /**
+   * 获取角色统计
+   * @returns {Object} 角色统计信息
+   */
+  getRoleStats() {
+    let adminCount = 0;
+    let userCount = 0;
+
+    for (const userData of this.users.values()) {
+      if (userData.role === Constants.ROLES.ADMIN) {
+        adminCount++;
+      } else if (userData.role === Constants.ROLES.USER) {
+        userCount++;
+      }
+    }
+
+    return {
+      admin: adminCount,
+      user: userCount,
+      total: this.users.size
+    };
+  }
 }
 
-module.exports = UserManager;
+module.exports = UserModel;

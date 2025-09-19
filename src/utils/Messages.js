@@ -1,5 +1,3 @@
-// src/utils/Messages.js
-
 /**
  * 系统消息管理
  */

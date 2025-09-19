@@ -1,5 +1,3 @@
-// src/utils/Validators.js
-
 const Constants = require('./Constants');
 const Messages = require('./Messages');
 

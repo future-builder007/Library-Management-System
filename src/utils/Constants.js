@@ -1,5 +1,3 @@
-// src/utils/Constants.js
-
 /**
  * 系统常量定义
  */
@@ -23,6 +21,28 @@ class Constants {
   static ACTIONS = {
     ADD: 'add',
     REMOVE: 'remove'
+  };
+
+  // 资源类型
+  static RESOURCES = {
+    BOOK: 'book',
+    USER: 'user'
+  };
+
+  // 图书操作类型
+  static BOOK_ACTIONS = {
+    LIST: 'list',
+    SEARCH: 'search',
+    ADD: 'add',
+    DELETE: 'delete',
+    BORROW: 'borrow',
+    RETURN: 'return'
+  };
+
+  // 用户操作类型
+  static USER_ACTIONS = {
+    VIEW_PROFILE: 'view_profile',
+    MANAGE: 'manage'
   };
 }
 

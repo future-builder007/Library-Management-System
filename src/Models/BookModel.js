@@ -1,9 +1,7 @@
-// src/managers/BookManager.js
-
 const Messages = require('../utils/Messages');
 const Validators = require('../utils/Validators');
 
-class BookManager {
+class BookModel {
   constructor() {
     this.books = new Map(); // {key: {name, author, inventory, borrowedBy}}
   }
@@ -224,4 +222,4 @@ class BookManager {
   }
 }
 
-module.exports = BookManager;
+module.exports = BookModel;
