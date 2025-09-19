@@ -2,7 +2,7 @@
 
 const readline = require('readline');
 const { program } = require('commander');
-const LibrarySystem = require('../src/LibrarySystem');
+const LibrarySystem = require('../src/index');
 
 const library = new LibrarySystem();
 
