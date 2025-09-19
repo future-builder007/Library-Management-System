@@ -76,8 +76,6 @@ class AuthModel {
     };
   }
 
-  // ==================== 高级权限检查 ====================
-
   /**
    * 检查用户是否有权限操作特定资源
    * @param {string} resource - 资源类型
@@ -184,55 +182,6 @@ class AuthModel {
         };
     }
   }
-
-  // ==================== 权限装饰器方法 ====================
-
-  /**
-   * 权限装饰器 - 要求登录
-   * @param {Function} fn - 目标函数
-   * @returns {Function} 装饰后的函数
-   */
-  requireLogin(fn) {
-    return (...args) => {
-      const authResult = this.checkLogin();
-      if (!authResult.success) {
-        return authResult.message;
-      }
-      return fn.apply(this, args);
-    };
-  }
-
-  /**
-   * 权限装饰器 - 要求管理员权限
-   * @param {Function} fn - 目标函数
-   * @returns {Function} 装饰后的函数
-   */
-  requireAdmin(fn) {
-    return (...args) => {
-      const authResult = this.checkAdminPermission();
-      if (!authResult.success) {
-        return authResult.message;
-      }
-      return fn.apply(this, args);
-    };
-  }
-
-  /**
-   * 权限装饰器 - 要求普通用户权限
-   * @param {Function} fn - 目标函数
-   * @returns {Function} 装饰后的函数
-   */
-  requireUser(fn) {
-    return (...args) => {
-      const authResult = this.checkUserPermission();
-      if (!authResult.success) {
-        return authResult.message;
-      }
-      return fn.apply(this, args);
-    };
-  }
-
-  // ==================== 会话管理 ====================
 
   /**
    * 获取当前用户信息

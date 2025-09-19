@@ -1,94 +1,74 @@
 # Library Management System
-## System Introduction
-This is a command-line management system, making it feature basic book
-management capabilities and a simple user interaction interface.
 
-1. Users (User) and Administrators (Admin) can register and log in to the system.
-2. Users can view the list of books, borrow multiple books, and return these books.
-3. Administrators have the authority to view the list of books, add books, delete
-   books. If a book is already in the system and the administrator tries to add it
-   again, the system should merge the inventory rather than create a new one. Also,
-   administrators cannot delete books that are currently being borrowed by users.
+一个简单的命令行图书管理系统，支持用户管理、图书管理和借阅功能。
 
-## How To Run
-1. Clone this repository to your local machine.
-2. Open the terminal and navigate to the root directory of this project.
-3. Run `npm install` to install all dependencies.
-4. Run `npm test` to run tests of the project.
-5. Run `npm link` to link to the global environment.
-6. Run `my_lms` to start the program.
+## 功能特性
 
-## How To Use
-After running `my_lms` command to run the program, you will see the following interface:
+- 👤 用户注册和登录（管理员/普通用户）
+- 📚 图书添加、删除、搜索
+- 📋 图书列表查看
+- 📖 图书借阅和归还
+- 🔐 基于角色的权限管理
 
-```welcome to library management system, please input your command (input exit to exit):```
+## 安装运行
 
-You can input the following commands to interact with the system:
-```shell
-Options:
-  -h, --help                         display help for command
+```bash
+# 安装依赖
+npm install
 
-Commands:
-  register <role> <name> <password>  Register a new admin with name and
-                                     password
-  login <name> <password>            login with name and password
-  logout                             logout
-  list                               list all books
-  search <bookName> <author>         Search book by book name and author
-  borrow <bookName> <author>         Borrow book by book name and author
-  delete <bookName> <author>         Delete book by name and author
-  return <bookName> <author>         Return book by book name and author
-  add <bookName> <author> <amount>   Add book inventory by book name and author
-  help [command]                     display help for command
+# 启动系统
+npm start
+
+# 或者直接运行
+node bin/my_lms.js
 ```
 
-### Example
-```shell
-my_lms
+## 快速开始
 
-$ register admin Alice password1
-Admin Alice successfully registered.
+1. **注册用户**
+   ```
+   register admin Alice password123  # 注册管理员
+   register user Bob password456     # 注册普通用户
+   ```
 
-$ register user Bob password2
-User Bob successfully registered.
+2. **登录系统**
+   ```
+   login Alice password123
+   ```
 
-$ login Alice password1
-Admin Alice successfully logged in.
+3. **添加图书**（管理员）
+   ```
+   add-book "Clean Code" "Robert C. Martin" 5
+   ```
 
-$ add "Clean Code" "Robert C. Martin" 5
-Book "Clean Code" by Robert C. Martin added successfully, inventory: 5.
+4. **借阅图书**（普通用户）
+   ```
+   login Bob password456
+   borrow-book "Clean Code" "Robert C. Martin"
+   ```
 
-$ list
-Book List:
-Clean Code - Robert C. Martin - Inventory: 5
+## 开发测试
 
-$ login Bob password2
-User Bob successfully logged in.
+```bash
+# 运行测试
+npm test
 
-$ search "Clean Code" "Robert C. Martin"
-Clean Code - Robert C. Martin - Inventory: 5
+# 测试覆盖率
+npm run test:coverage
 
-$ borrow "Clean Code" "Robert C. Martin"
-Book "Clean Code" successfully borrowed.
-
-$ login Alice password1
-Admin Alice successfully logged in.
-
-$ delete "Clean Code" "Robert C. Martin"
-Cannot delete book "Clean Code" because it is currently borrowed.
-
-$ login Bob password2
-User Bob successfully logged in.
-
-$ return "Clean Code" "Robert C. Martin"
-Book "Clean Code" successfully returned.
-
-$ login Alice password1
-Admin Alice successfully logged in.
-
-$ add "Clean Code" "Robert C. Martin" 3
-Book "Clean Code" inventory successfully updated, new inventory: 8.
-
-$ exit
-see you next time!
+# 查看覆盖率报告
+npm run test:coverage:open
 ```
+
+## 项目结构
+
+```
+├── src/              # 源代码
+├── test/             # 测试文件
+├── bin/              # 可执行文件
+└── package.json      # 项目配置
+```
+
+## 许可证
+
+MIT License
