@@ -2,6 +2,8 @@
 
 const readline = require('readline');
 const { program } = require('commander');
+const chalk = require('chalk');
+const figlet = require('figlet');
 const LibrarySystem = require('../src/index');
 
 const library = new LibrarySystem();
@@ -16,7 +18,7 @@ program
   .description('Register a new user with role (admin/user), name and password')
   .action((role, name, password) => {
     const result = library.register(role, name, password);
-    console.log(result);
+    console.log(chalk.cyan(result));
   });
 
 program
@@ -24,7 +26,11 @@ program
   .description('login with name and password')
   .action((name, password) => {
     const result = library.login(name, password);
-    console.log(result);
+    if (result.includes('success') || result.includes('成功')) {
+      console.log(chalk.green(result));
+    } else {
+      console.log(chalk.red(result));
+    }
   });
 
 program
@@ -32,7 +38,7 @@ program
   .description('logout')
   .action(() => {
     const result = library.logout();
-    console.log(result);
+    console.log(chalk.yellow(result));
   });
 
 program
@@ -40,7 +46,7 @@ program
   .description('list all books')
   .action(() => {
     const result = library.listBooks();
-    console.log(result);
+    console.log(chalk.blue(result));
   });
 
 program
@@ -48,7 +54,7 @@ program
   .description('Search book by book name and author')
   .action((bookName, author) => {
     const result = library.searchBook(bookName, author);
-    console.log(result);
+    console.log(chalk.magenta(result));
   });
 
 program
@@ -56,7 +62,11 @@ program
   .description('Borrow book by book name and author')
   .action((bookName, author) => {
     const result = library.borrowBook(bookName, author);
-    console.log(result);
+    if (result.includes('success') || result.includes('成功')) {
+      console.log(chalk.green(result));
+    } else {
+      console.log(chalk.red(result));
+    }
   });
 
 program
@@ -64,7 +74,11 @@ program
   .description('Return book by book name and author')
   .action((bookName, author) => {
     const result = library.returnBook(bookName, author);
-    console.log(result);
+    if (result.includes('success') || result.includes('成功')) {
+      console.log(chalk.green(result));
+    } else {
+      console.log(chalk.red(result));
+    }
   });
 
 program
@@ -72,7 +86,11 @@ program
   .description('Add book inventory by book name and author')
   .action((bookName, author, amount) => {
     const result = library.addBook(bookName, author, parseInt(amount));
-    console.log(result);
+    if (result.includes('success') || result.includes('成功')) {
+      console.log(chalk.green(result));
+    } else {
+      console.log(chalk.red(result));
+    }
   });
 
 program
@@ -80,7 +98,11 @@ program
   .description('Delete book by name and author')
   .action((bookName, author) => {
     const result = library.deleteBook(bookName, author);
-    console.log(result);
+    if (result.includes('success') || result.includes('成功')) {
+      console.log(chalk.green(result));
+    } else {
+      console.log(chalk.red(result));
+    }
   });
 
 // 创建readline接口
@@ -89,13 +111,22 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
-console.log('welcome to library management system, please input your command (input exit to exit):');
+// 显示欢迎标题
+console.log(chalk.cyan(figlet.textSync('Library Management', {
+  font: 'Standard',
+  horizontalLayout: 'default',
+  verticalLayout: 'default'
+})));
+
+console.log(chalk.green.bold('Welcome to Library Management System!'));
+console.log(chalk.yellow('Please input your command (input "exit" to exit):'));
+console.log(chalk.gray('Type "help" for available commands.\n'));
 
 // 主循环
 function promptUser() {
-  rl.question('$ ', (input) => {
+  rl.question(chalk.cyan.bold('$ '), (input) => {
     if (input.trim() === 'exit') {
-      console.log('see you next time!');
+      console.log(chalk.magenta.bold('See you next time! 👋'));
       rl.close();
       return;
     }
@@ -116,7 +147,7 @@ function promptUser() {
       
       program.parse(process.argv);
     } catch (error) {
-      console.log('Invalid command. Type "help" for available commands.');
+      console.log(chalk.red.bold('❌ Invalid command. Type "help" for available commands.'));
     }
 
     promptUser();
@@ -130,7 +161,7 @@ function setupCommands() {
     .description('Register a new user with role (admin/user), name and password')
     .action((role, name, password) => {
       const result = library.register(role, name, password);
-      console.log(result);
+      console.log(chalk.cyan(result));
     });
 
   program
@@ -138,7 +169,11 @@ function setupCommands() {
     .description('login with name and password')
     .action((name, password) => {
       const result = library.login(name, password);
-      console.log(result);
+      if (result.includes('success') || result.includes('成功')) {
+        console.log(chalk.green('✅ ' + result));
+      } else {
+        console.log(chalk.red('❌ ' + result));
+      }
     });
 
   program
@@ -146,7 +181,7 @@ function setupCommands() {
     .description('logout')
     .action(() => {
       const result = library.logout();
-      console.log(result);
+      console.log(chalk.yellow('👋 ' + result));
     });
 
   program
@@ -154,7 +189,7 @@ function setupCommands() {
     .description('list all books')
     .action(() => {
       const result = library.listBooks();
-      console.log(result);
+      console.log(chalk.blue('📚 ' + result));
     });
 
   program
@@ -162,7 +197,7 @@ function setupCommands() {
     .description('Search book by book name and author')
     .action((bookName, author) => {
       const result = library.searchBook(bookName, author);
-      console.log(result);
+      console.log(chalk.magenta('🔍 ' + result));
     });
 
   program
@@ -170,7 +205,11 @@ function setupCommands() {
     .description('Borrow book by book name and author')
     .action((bookName, author) => {
       const result = library.borrowBook(bookName, author);
-      console.log(result);
+      if (result.includes('success') || result.includes('成功')) {
+        console.log(chalk.green('📖 ' + result));
+      } else {
+        console.log(chalk.red('❌ ' + result));
+      }
     });
 
   program
@@ -178,7 +217,11 @@ function setupCommands() {
     .description('Return book by book name and author')
     .action((bookName, author) => {
       const result = library.returnBook(bookName, author);
-      console.log(result);
+      if (result.includes('success') || result.includes('成功')) {
+        console.log(chalk.green('📚 ' + result));
+      } else {
+        console.log(chalk.red('❌ ' + result));
+      }
     });
 
   program
@@ -186,7 +229,11 @@ function setupCommands() {
     .description('Add book inventory by book name and author')
     .action((bookName, author, amount) => {
       const result = library.addBook(bookName, author, parseInt(amount));
-      console.log(result);
+      if (result.includes('success') || result.includes('成功')) {
+        console.log(chalk.green('➕ ' + result));
+      } else {
+        console.log(chalk.red('❌ ' + result));
+      }
     });
 
   program
@@ -194,13 +241,19 @@ function setupCommands() {
     .description('Delete book by name and author')
     .action((bookName, author) => {
       const result = library.deleteBook(bookName, author);
-      console.log(result);
+      if (result.includes('success') || result.includes('成功')) {
+        console.log(chalk.green('🗑️ ' + result));
+      } else {
+        console.log(chalk.red('❌ ' + result));
+      }
     });
 
   program
     .command('help')
     .description('display help for command')
     .action(() => {
+      console.log(chalk.cyan.bold('\n📋 Available Commands:'));
+      console.log(chalk.gray('─'.repeat(50)));
       program.help();
     });
 }
