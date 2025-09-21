@@ -6,290 +6,309 @@ const chalk = require('chalk');
 const figlet = require('figlet');
 const LibrarySystem = require('../src/index');
 
-const library = new LibrarySystem();
+// 常量定义
+const CONSTANTS = {
+  COMMANDS: {
+    EXIT: 'exit',
+    HELP: 'help'
+  },
+  MESSAGES: {
+    WELCOME: 'Welcome to Library Management System!',
+    PROMPT: 'Please input your command (input "exit" to exit):',
+    HELP_TIP: 'Type "help" for available commands.\n',
+    GOODBYE: 'See you next time! 👋',
+    INVALID_COMMAND: '❌ Invalid command. Type "help" for available commands.',
+    AVAILABLE_COMMANDS: '\n📋 Available Commands:',
+    SEPARATOR: '─'.repeat(50)
+  },
+  ICONS: {
+    SUCCESS: '✅',
+    ERROR: '❌',
+    LOGOUT: '👋',
+    BOOKS: '📚',
+    SEARCH: '🔍',
+    BORROW: '📖',
+    RETURN: '📚',
+    ADD: '➕',
+    DELETE: '🗑️'
+  }
+};
 
-// 配置commander程序
-program
-  .description('Library Management System')
-  .option('-h, --help', 'display help for command');
+/**
+ * CLI应用程序类
+ */
+class LibraryCLI {
+  constructor() {
+    this.library = new LibrarySystem();
+    this.rl = this.createReadlineInterface();
+    this.setupProgram();
+  }
 
-program
-  .command('register <role> <name> <password>')
-  .description('Register a new user with role (admin/user), name and password')
-  .action((role, name, password) => {
-    const result = library.register(role, name, password);
-    console.log(chalk.cyan(result));
-  });
+  /**
+   * 创建readline接口
+   */
+  createReadlineInterface() {
+    return readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+  }
 
-program
-  .command('login <name> <password>')
-  .description('login with name and password')
-  .action((name, password) => {
-    const result = library.login(name, password);
-    if (result.includes('success') || result.includes('成功')) {
-      console.log(chalk.green(result));
+  /**
+   * 设置commander程序
+   */
+  setupProgram() {
+    program
+      .description('Library Management System')
+      .option('-h, --help', 'display help for command');
+  }
+
+  /**
+   * 显示欢迎信息
+   */
+  displayWelcome() {
+    console.log(chalk.cyan(figlet.textSync('Library Management', {
+      font: 'Standard',
+      horizontalLayout: 'default',
+      verticalLayout: 'default'
+    })));
+
+    console.log(chalk.green.bold(CONSTANTS.MESSAGES.WELCOME));
+    console.log(chalk.yellow(CONSTANTS.MESSAGES.PROMPT));
+    console.log(chalk.gray(CONSTANTS.MESSAGES.HELP_TIP));
+  }
+
+  /**
+   * 判断操作是否成功
+   */
+  isSuccess(result) {
+    return result.includes('success') || result.includes('成功');
+  }
+
+  /**
+   * 显示结果信息
+   */
+  displayResult(result, icon = '', successColor = chalk.green, errorColor = chalk.red) {
+    const prefix = icon ? `${icon} ` : '';
+    if (this.isSuccess(result)) {
+      console.log(successColor(prefix + result));
     } else {
-      console.log(chalk.red(result));
+      console.log(errorColor(prefix + result));
     }
-  });
+  }
 
-program
-  .command('logout')
-  .description('logout')
-  .action(() => {
-    const result = library.logout();
-    console.log(chalk.yellow(result));
-  });
+  /**
+   * 创建命令处理器
+   */
+  createCommandHandlers() {
+    const handlers = {
+      register: (role, name, password) => {
+        const result = this.library.register(role, name, password);
+        console.log(chalk.cyan(result));
+      },
 
-program
-  .command('list')
-  .description('list all books')
-  .action(() => {
-    const result = library.listBooks();
-    console.log(chalk.blue(result));
-  });
+      login: (name, password) => {
+        const result = this.library.login(name, password);
+        this.displayResult(result, CONSTANTS.ICONS.SUCCESS);
+      },
 
-program
-  .command('search <bookName> <author>')
-  .description('Search book by book name and author')
-  .action((bookName, author) => {
-    const result = library.searchBook(bookName, author);
-    console.log(chalk.magenta(result));
-  });
+      logout: () => {
+        const result = this.library.logout();
+        console.log(chalk.yellow(`${CONSTANTS.ICONS.LOGOUT} ${result}`));
+      },
 
-program
-  .command('borrow <bookName> <author>')
-  .description('Borrow book by book name and author')
-  .action((bookName, author) => {
-    const result = library.borrowBook(bookName, author);
-    if (result.includes('success') || result.includes('成功')) {
-      console.log(chalk.green(result));
-    } else {
-      console.log(chalk.red(result));
+      list: () => {
+        const result = this.library.listBooks();
+        console.log(chalk.blue(`${CONSTANTS.ICONS.BOOKS} ${result}`));
+      },
+
+      search: (bookName, author) => {
+        const result = this.library.searchBook(bookName, author);
+        console.log(chalk.magenta(`${CONSTANTS.ICONS.SEARCH} ${result}`));
+      },
+
+      borrow: (bookName, author) => {
+        const result = this.library.borrowBook(bookName, author);
+        this.displayResult(result, CONSTANTS.ICONS.BORROW);
+      },
+
+      return: (bookName, author) => {
+        const result = this.library.returnBook(bookName, author);
+        this.displayResult(result, CONSTANTS.ICONS.RETURN);
+      },
+
+      add: (bookName, author, amount) => {
+        const result = this.library.addBook(bookName, author, parseInt(amount));
+        this.displayResult(result, CONSTANTS.ICONS.ADD);
+      },
+
+      delete: (bookName, author) => {
+        const result = this.library.deleteBook(bookName, author);
+        this.displayResult(result, CONSTANTS.ICONS.DELETE);
+      },
+
+      help: () => {
+        console.log(chalk.cyan.bold(CONSTANTS.MESSAGES.AVAILABLE_COMMANDS));
+        console.log(chalk.gray(CONSTANTS.MESSAGES.SEPARATOR));
+        program.help();
+      }
+    };
+
+    return handlers;
+  }
+
+  /**
+   * 注册所有命令
+   */
+  registerCommands() {
+    const handlers = this.createCommandHandlers();
+
+    // 清空现有命令
+    program.commands = [];
+
+    // 注册命令
+    program
+      .command('register <role> <name> <password>')
+      .description('Register a new user with role (admin/user), name and password')
+      .action(handlers.register);
+
+    program
+      .command('login <name> <password>')
+      .description('login with name and password')
+      .action(handlers.login);
+
+    program
+      .command('logout')
+      .description('logout')
+      .action(handlers.logout);
+
+    program
+      .command('list')
+      .description('list all books')
+      .action(handlers.list);
+
+    program
+      .command('search <bookName> <author>')
+      .description('Search book by book name and author')
+      .action(handlers.search);
+
+    program
+      .command('borrow <bookName> <author>')
+      .description('Borrow book by book name and author')
+      .action(handlers.borrow);
+
+    program
+      .command('return <bookName> <author>')
+      .description('Return book by book name and author')
+      .action(handlers.return);
+
+    program
+      .command('add <bookName> <author> <amount>')
+      .description('Add book inventory by book name and author')
+      .action(handlers.add);
+
+    program
+      .command('delete <bookName> <author>')
+      .description('Delete book by name and author')
+      .action(handlers.delete);
+
+    program
+      .command('help')
+      .description('display help for command')
+      .action(handlers.help);
+  }
+
+  /**
+   * 解析输入字符串为参数数组
+   */
+  parseInput(input) {
+    const args = [];
+    let current = '';
+    let inQuotes = false;
+    let quoteChar = '';
+
+    for (let i = 0; i < input.length; i++) {
+      const char = input[i];
+      
+      if ((char === '"' || char === "'") && !inQuotes) {
+        inQuotes = true;
+        quoteChar = char;
+      } else if (char === quoteChar && inQuotes) {
+        inQuotes = false;
+        quoteChar = '';
+      } else if (char === ' ' && !inQuotes) {
+        if (current) {
+          args.push(current);
+          current = '';
+        }
+      } else {
+        current += char;
+      }
     }
-  });
-
-program
-  .command('return <bookName> <author>')
-  .description('Return book by book name and author')
-  .action((bookName, author) => {
-    const result = library.returnBook(bookName, author);
-    if (result.includes('success') || result.includes('成功')) {
-      console.log(chalk.green(result));
-    } else {
-      console.log(chalk.red(result));
+    
+    if (current) {
+      args.push(current);
     }
-  });
+    
+    return args;
+  }
 
-program
-  .command('add <bookName> <author> <amount>')
-  .description('Add book inventory by book name and author')
-  .action((bookName, author, amount) => {
-    const result = library.addBook(bookName, author, parseInt(amount));
-    if (result.includes('success') || result.includes('成功')) {
-      console.log(chalk.green(result));
-    } else {
-      console.log(chalk.red(result));
-    }
-  });
+  /**
+   * 处理用户输入
+   */
+  handleUserInput(input) {
+    const trimmedInput = input.trim();
 
-program
-  .command('delete <bookName> <author>')
-  .description('Delete book by name and author')
-  .action((bookName, author) => {
-    const result = library.deleteBook(bookName, author);
-    if (result.includes('success') || result.includes('成功')) {
-      console.log(chalk.green(result));
-    } else {
-      console.log(chalk.red(result));
-    }
-  });
-
-// 创建readline接口
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-// 显示欢迎标题
-console.log(chalk.cyan(figlet.textSync('Library Management', {
-  font: 'Standard',
-  horizontalLayout: 'default',
-  verticalLayout: 'default'
-})));
-
-console.log(chalk.green.bold('Welcome to Library Management System!'));
-console.log(chalk.yellow('Please input your command (input "exit" to exit):'));
-console.log(chalk.gray('Type "help" for available commands.\n'));
-
-// 主循环
-function promptUser() {
-  rl.question(chalk.cyan.bold('$ '), (input) => {
-    if (input.trim() === 'exit') {
-      console.log(chalk.magenta.bold('See you next time! 👋'));
-      rl.close();
-      return;
+    // 处理退出命令
+    if (trimmedInput === CONSTANTS.COMMANDS.EXIT) {
+      console.log(chalk.magenta.bold(CONSTANTS.MESSAGES.GOODBYE));
+      this.rl.close();
+      return false;
     }
 
-    if (input.trim() === '') {
-      promptUser();
-      return;
+    // 处理空输入
+    if (trimmedInput === '') {
+      return true;
     }
 
-    // 解析输入并执行命令
+    // 解析并执行命令
     try {
-      const args = parseInput(input);
+      const args = this.parseInput(trimmedInput);
       process.argv = ['node', 'my_lms', ...args];
       
-      // 重置program的子命令
-      program.commands = [];
-      setupCommands();
+      // 重新注册命令
+      this.registerCommands();
       
       program.parse(process.argv);
     } catch (error) {
-      console.log(chalk.red.bold('❌ Invalid command. Type "help" for available commands.'));
+      console.log(chalk.red.bold(CONSTANTS.MESSAGES.INVALID_COMMAND));
     }
 
-    promptUser();
-  });
-}
-
-// 设置所有命令
-function setupCommands() {
-  program
-    .command('register <role> <name> <password>')
-    .description('Register a new user with role (admin/user), name and password')
-    .action((role, name, password) => {
-      const result = library.register(role, name, password);
-      console.log(chalk.cyan(result));
-    });
-
-  program
-    .command('login <name> <password>')
-    .description('login with name and password')
-    .action((name, password) => {
-      const result = library.login(name, password);
-      if (result.includes('success') || result.includes('成功')) {
-        console.log(chalk.green('✅ ' + result));
-      } else {
-        console.log(chalk.red('❌ ' + result));
-      }
-    });
-
-  program
-    .command('logout')
-    .description('logout')
-    .action(() => {
-      const result = library.logout();
-      console.log(chalk.yellow('👋 ' + result));
-    });
-
-  program
-    .command('list')
-    .description('list all books')
-    .action(() => {
-      const result = library.listBooks();
-      console.log(chalk.blue('📚 ' + result));
-    });
-
-  program
-    .command('search <bookName> <author>')
-    .description('Search book by book name and author')
-    .action((bookName, author) => {
-      const result = library.searchBook(bookName, author);
-      console.log(chalk.magenta('🔍 ' + result));
-    });
-
-  program
-    .command('borrow <bookName> <author>')
-    .description('Borrow book by book name and author')
-    .action((bookName, author) => {
-      const result = library.borrowBook(bookName, author);
-      if (result.includes('success') || result.includes('成功')) {
-        console.log(chalk.green('📖 ' + result));
-      } else {
-        console.log(chalk.red('❌ ' + result));
-      }
-    });
-
-  program
-    .command('return <bookName> <author>')
-    .description('Return book by book name and author')
-    .action((bookName, author) => {
-      const result = library.returnBook(bookName, author);
-      if (result.includes('success') || result.includes('成功')) {
-        console.log(chalk.green('📚 ' + result));
-      } else {
-        console.log(chalk.red('❌ ' + result));
-      }
-    });
-
-  program
-    .command('add <bookName> <author> <amount>')
-    .description('Add book inventory by book name and author')
-    .action((bookName, author, amount) => {
-      const result = library.addBook(bookName, author, parseInt(amount));
-      if (result.includes('success') || result.includes('成功')) {
-        console.log(chalk.green('➕ ' + result));
-      } else {
-        console.log(chalk.red('❌ ' + result));
-      }
-    });
-
-  program
-    .command('delete <bookName> <author>')
-    .description('Delete book by name and author')
-    .action((bookName, author) => {
-      const result = library.deleteBook(bookName, author);
-      if (result.includes('success') || result.includes('成功')) {
-        console.log(chalk.green('🗑️ ' + result));
-      } else {
-        console.log(chalk.red('❌ ' + result));
-      }
-    });
-
-  program
-    .command('help')
-    .description('display help for command')
-    .action(() => {
-      console.log(chalk.cyan.bold('\n📋 Available Commands:'));
-      console.log(chalk.gray('─'.repeat(50)));
-      program.help();
-    });
-}
-
-// 解析输入字符串为参数数组
-function parseInput(input) {
-  const args = [];
-  let current = '';
-  let inQuotes = false;
-  let quoteChar = '';
-
-  for (let i = 0; i < input.length; i++) {
-    const char = input[i];
-    
-    if ((char === '"' || char === "'") && !inQuotes) {
-      inQuotes = true;
-      quoteChar = char;
-    } else if (char === quoteChar && inQuotes) {
-      inQuotes = false;
-      quoteChar = '';
-    } else if (char === ' ' && !inQuotes) {
-      if (current) {
-        args.push(current);
-        current = '';
-      }
-    } else {
-      current += char;
-    }
+    return true;
   }
-  
-  if (current) {
-    args.push(current);
+
+  /**
+   * 用户交互主循环
+   */
+  promptUser() {
+    this.rl.question(chalk.cyan.bold('$ '), (input) => {
+      const shouldContinue = this.handleUserInput(input);
+      
+      if (shouldContinue) {
+        this.promptUser();
+      }
+    });
   }
-  
-  return args;
+
+  /**
+   * 启动应用程序
+   */
+  start() {
+    this.displayWelcome();
+    this.promptUser();
+  }
 }
 
-// 开始交互
-promptUser();
+// 启动应用程序
+const app = new LibraryCLI();
+app.start();
