@@ -150,7 +150,25 @@ class LibraryCLI {
       help: () => {
         console.log(chalk.cyan.bold(CONSTANTS.MESSAGES.AVAILABLE_COMMANDS));
         console.log(chalk.gray(CONSTANTS.MESSAGES.SEPARATOR));
-        program.help();
+        
+        const commands = [
+          { cmd: 'register <role> <name> <password>', desc: 'Register a new user with role (admin/user), name and password', color: chalk.blue },
+          { cmd: 'login <name> <password>', desc: 'login with name and password', color: chalk.green },
+          { cmd: 'logout', desc: 'logout', color: chalk.yellow },
+          { cmd: 'list', desc: 'list all books', color: chalk.magenta },
+          { cmd: 'search <bookName> <author>', desc: 'Search book by book name and author', color: chalk.cyan },
+          { cmd: 'borrow <bookName> <author>', desc: 'Borrow book by book name and author', color: chalk.blue },
+          { cmd: 'return <bookName> <author>', desc: 'Return book by book name and author', color: chalk.green },
+          { cmd: 'add <bookName> <author> <amount>', desc: 'Add book inventory by book name and author', color: chalk.magenta },
+          { cmd: 'delete <bookName> <author>', desc: 'Delete book by name and author', color: chalk.red },
+          { cmd: 'help', desc: 'display help for command', color: chalk.gray }
+        ];
+        
+        commands.forEach(({ cmd, desc, color }) => {
+          console.log(`  ${color.bold(cmd.padEnd(30))} ${chalk.white(desc)}`);
+        });
+        
+        console.log(chalk.gray(CONSTANTS.MESSAGES.SEPARATOR));
       }
     };
 
@@ -287,9 +305,6 @@ class LibraryCLI {
     return true;
   }
 
-  /**
-   * 用户交互主循环
-   */
   promptUser() {
     this.rl.question(chalk.cyan.bold('$ '), (input) => {
       const shouldContinue = this.handleUserInput(input);
@@ -300,15 +315,11 @@ class LibraryCLI {
     });
   }
 
-  /**
-   * 启动应用程序
-   */
   start() {
     this.displayWelcome();
     this.promptUser();
   }
 }
 
-// 启动应用程序
 const app = new LibraryCLI();
 app.start();
